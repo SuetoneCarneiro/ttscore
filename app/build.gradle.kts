@@ -63,6 +63,8 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:34.14.0")) // Versão estável mais recente
     implementation("com.google.firebase:firebase-firestore")
     implementation(libs.firebase.common.ktx)
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.androidx.compose.material.icons.extended)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
