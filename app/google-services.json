@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "408134807144",
+    "project_id": "ttscore-76d38",
+    "storage_bucket": "ttscore-76d38.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:408134807144:android:7603c71d2f0ff537c055dd",
+        "android_client_info": {
+          "package_name": "com.example.ttscore"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCnfSGQ-W076Wy7AiW5BpA7Wg33MhvBXGo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
+
 }
 
 android {
@@ -37,6 +39,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "com.google.firebase" && requested.name == "firebase-common-ktx") {
+                // Força o Gradle a usar a versão correta integrada ao BoM atualizado
+                useVersion("21.0.0")
+            }
+        }
+    }
+
 }
 
 dependencies {
@@ -48,6 +60,9 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(platform("com.google.firebase:firebase-bom:34.14.0")) // Versão estável mais recente
+    implementation("com.google.firebase:firebase-firestore")
+    implementation(libs.firebase.common.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)
