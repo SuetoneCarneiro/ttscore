@@ -29,6 +29,7 @@ fun HomeScreen(
     onNavigateToListarJogadores: () -> Unit,
     onNavigateToRanking: () -> Unit,
     onNavigateToFirebaseTest: () -> Unit
+
 ) {
     val context = LocalContext.current
     val scrollState = rememberScrollState()
@@ -74,7 +75,7 @@ fun HomeScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // ── 1. Autenticação ──────────────────────────────────────────────
+            // Autenticação
             TestSection(title = "1. Autenticacao (Registro/Login)") {
                 OutlinedTextField(value = username, onValueChange = { username = it }, label = { Text("Username") }, modifier = Modifier.fillMaxWidth())
                 OutlinedTextField(value = email, onValueChange = { email = it }, label = { Text("Email") }, modifier = Modifier.fillMaxWidth())
@@ -125,7 +126,7 @@ fun HomeScreen(
                 }
             }
 
-            // ── 2. Perfil ────────────────────────────────────────────────────
+            // Perfil
             TestSection(title = "2. Perfil (PUT /api/users/me)") {
                 BotaoAtualizarPerfil(
                     token = userToken,
@@ -137,7 +138,7 @@ fun HomeScreen(
                 )
             }
 
-            // ── 3. Ranking ───────────────────────────────────────────────────
+            // Ranking
             TestSection(title = "3. Ranking (GET /api/users/ranking)") {
                 Button(
                     onClick = { if (userToken.isNotEmpty()) userViewModel.buscarRanking(userToken) else Toast.makeText(context, "Faça login primeiro", Toast.LENGTH_SHORT).show() },
@@ -159,7 +160,7 @@ fun HomeScreen(
                 }
             }
 
-            // ── 4. Registrar Partida ─────────────────────────────────────────
+            // Registrar Partida
             TestSection(title = "4. Registrar Partida (POST /api/matches)") {
                 OutlinedTextField(
                     value = opponentUsername,
@@ -178,7 +179,7 @@ fun HomeScreen(
                 )
             }
 
-            // ── 5. Minhas Partidas ───────────────────────────────────────────
+            // Partidas do Usuário logado
             TestSection(title = "5. Minhas Partidas (GET /api/matches/me)") {
                 Button(
                     onClick = { if (userToken.isNotEmpty()) matchViewModel.buscarMinhasPartidas(userToken) else Toast.makeText(context, "Faça login primeiro", Toast.LENGTH_SHORT).show() },
@@ -188,7 +189,7 @@ fun HomeScreen(
                 MatchListResult(matchListState)
             }
 
-            // ── 6. Partidas por Username ─────────────────────────────────────
+            // Partidas por Username
             TestSection(title = "6. Partidas por Username (GET /api/matches/user/{username})") {
                 OutlinedTextField(
                     value = searchUsername,
@@ -208,7 +209,7 @@ fun HomeScreen(
                 MatchListResult(matchListState)
             }
 
-            // ── 7. Head-to-Head ──────────────────────────────────────────────
+            // Head-to-Head
             TestSection(title = "7. Head-to-Head (GET /api/matches/versus/{username})") {
                 OutlinedTextField(
                     value = opponentUsername,
@@ -228,7 +229,7 @@ fun HomeScreen(
                 MatchListResult(matchListState)
             }
 
-            // ── 8. Amizades ──────────────────────────────────────────────────
+            // Amizades
             TestSection(title = "8. Enviar Pedido de Amizade (POST /api/friendships/request/{id})") {
                 OutlinedTextField(
                     value = addresseeId,
@@ -257,7 +258,7 @@ fun HomeScreen(
                 }
             }
 
-            // ── 9. Pedidos Pendentes ─────────────────────────────────────────
+            // Pedidos Pendentes
             TestSection(title = "9. Pedidos Pendentes (GET /api/friendships/pending)") {
                 Button(
                     onClick = { if (userToken.isNotEmpty()) friendshipViewModel.buscarPendentes(userToken) else Toast.makeText(context, "Faça login primeiro", Toast.LENGTH_SHORT).show() },
@@ -278,7 +279,7 @@ fun HomeScreen(
                 }
             }
 
-            // ── 10. Aceitar / Remover Amizade ─────────────────────────────────
+            //  Aceitar ou Remover Amizade
             TestSection(title = "10. Aceitar / Remover Amizade") {
                 OutlinedTextField(
                     value = friendshipId,
@@ -304,10 +305,13 @@ fun HomeScreen(
                 }
             }
 
-            // ── Navegação ─────────────────────────────────────────────────────
-            TestSection(title = "Outras Telas") {
-                Button(onClick = onNavigateToRanking, modifier = Modifier.fillMaxWidth()) { Text("Tela Ranking") }
-                Button(onClick = onNavigateToFirebaseTest, modifier = Modifier.fillMaxWidth()) { Text("Firebase Original") }
+            // Navegação
+            TestSection(title = "Navegação Principal") {
+                Button(onClick = onNavigateToNovaPartida, modifier = Modifier.fillMaxWidth()) { Text("Nova Partida") }
+                Button(onClick = onNavigateToCadastrarJogadores, modifier = Modifier.fillMaxWidth()) { Text("Cadastrar Jogadores") }
+                Button(onClick = onNavigateToListarJogadores, modifier = Modifier.fillMaxWidth()) { Text("Listar Jogadores") }
+                Button(onClick = onNavigateToRanking, modifier = Modifier.fillMaxWidth()) { Text("Tela Ranking (API)") }
+                Button(onClick = onNavigateToFirebaseTest, modifier = Modifier.fillMaxWidth(), colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)) { Text("Firebase Original") }
             }
         }
     }
