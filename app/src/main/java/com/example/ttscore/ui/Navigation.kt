@@ -12,6 +12,9 @@ sealed class Screen(val route: String) {
     object ListarJogadores : Screen("listar_jogadores")
     object Ranking : Screen("ranking")
     object FirebaseTest : Screen("firebase_test")
+    object Partida : Screen("partida/{p1}/{p2}") {
+        fun createRoute(p1: String, p2: String) = "partida/$p1/$p2"
+    }
 }
 
 @Composable
@@ -29,7 +32,23 @@ fun AppNavigation() {
             )
         }
         composable(Screen.NovaPartida.route) {
-            NovaPartidaScreen(onBack = { navController.popBackStack() })
+            NovaPartidaScreen(
+                onBack = { navController.popBackStack() },
+                onStartMatch = { p1, p2 ->
+                    navController.navigate(Screen.Partida.createRoute(p1, p2))
+                }
+            )
+        }
+        composable(
+            route = Screen.Partida.route
+        ) { backStackEntry ->
+            val p1 = backStackEntry.arguments?.getString("p1") ?: "Jogador 1"
+            val p2 = backStackEntry.arguments?.getString("p2") ?: "Jogador 2"
+            PartidaScreen(
+                player1Name = p1,
+                player2Name = p2,
+                onFinish = { navController.popBackStack() }
+            )
         }
         composable(Screen.CadastrarJogadores.route) {
             CadastrarJogadoresScreen(onBack = { navController.popBackStack() })
