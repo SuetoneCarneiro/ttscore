@@ -1,10 +1,13 @@
 package com.example.ttscore.ui
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.SwapHoriz
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -14,62 +17,47 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.example.ttscore.data.local.SessionManager
 import com.example.ttscore.domain.model.Usuario
 import com.example.ttscore.ui.viewmodel.UserViewModel
 import com.example.ttscore.util.Resource
-import kotlinx.coroutines.flow.first
-import androidx.compose.ui.platform.LocalContext
-import dagger.hilt.android.EntryPointAccessors
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import dagger.hilt.EntryPoint
-
-@EntryPoint
-@InstallIn(SingletonComponent::class)
-interface SessionManagerEntryPoint {
-    fun sessionManager(): SessionManager
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RankingScreen(
     onBack: () -> Unit,
+    onNavigateToHistory: (String, String) -> Unit,
     viewModel: UserViewModel = hiltViewModel()
 ) {
-    val context = LocalContext.current
     val rankingState by viewModel.rankingState.collectAsState()
+    var selectedUser by remember { mutableStateOf<Usuario?>(null) }
+
+    val darkNavy = Color(0xFF001F3F)
+    val p1Blue = Color(0xFF0D47A1)
 
     LaunchedEffect(Unit) {
-        // Busca o SessionManager através do EntryPoint
-        val sessionManager = EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            SessionManagerEntryPoint::class.java
-        ).sessionManager()
-        
-        // Carrega o token salvo
-        val token = sessionManager.token.first()
-        if (token != null) {
-            viewModel.buscarRanking("Bearer $token")
-        }
+        viewModel.buscarRanking()
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Ranking Global") },
+                title = { Text("Ranking Global", fontWeight = FontWeight.Bold) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
+                        Icon(
+                            Icons.AutoMirrored.Filled.ArrowBack, 
+                            contentDescription = "Voltar", 
+                            tint = Color.White
+                        )
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
+                    containerColor = darkNavy,
+                    titleContentColor = Color.White
                 )
             )
-        }
+        },
+        containerColor = darkNavy
     ) { padding ->
         Box(
             modifier = Modifier
@@ -78,70 +66,103 @@ fun RankingScreen(
         ) {
             when (val state = rankingState) {
                 is Resource.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
                 }
                 is Resource.Success -> {
                     val rankingList = state.data ?: emptyList()
                     if (rankingList.isEmpty()) {
                         Text(
                             text = "Nenhum jogador encontrado",
+                            color = Color.White,
                             modifier = Modifier.align(Alignment.Center)
                         )
                     } else {
-                        RankingList(rankingList)
+                        RankingList(rankingList) { user -> selectedUser = user }
                     }
                 }
                 is Resource.Error -> {
                     Column(
-                        modifier = Modifier.align(Alignment.Center),
+                        modifier = Modifier.align(Alignment.Center).padding(16.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(text = "Erro ao carregar ranking", color = Color.Red)
-                        Text(text = state.message ?: "", fontSize = 12.sp, color = Color.Gray)
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Button(onClick = { 
-                            // Tentar novamente
-                            onBack() 
-                        }) {
-                            Text("Voltar e Logar novamente")
+                        Text(text = "Erro ao carregar ranking", color = Color(0xFFB71C1C), fontWeight = FontWeight.Bold)
+                        Text(text = state.message ?: "", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Button(onClick = onBack, colors = ButtonDefaults.buttonColors(containerColor = p1Blue)) {
+                            Text("Voltar", color = Color.White)
                         }
                     }
                 }
-                null -> {
-                    Text(
-                        text = "Carregando Ranking...",
-                        modifier = Modifier.align(Alignment.Center)
-                    )
-                }
+                null -> {}
             }
         }
+    }
+
+    if (selectedUser != null) {
+        AlertDialog(
+            onDismissRequest = { selectedUser = null },
+            containerColor = darkNavy,
+            title = { Text(selectedUser!!.username, color = Color.White, fontWeight = FontWeight.Bold) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(
+                        onClick = {
+                            onNavigateToHistory(selectedUser!!.username, "user")
+                            selectedUser = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.1f))
+                    ) {
+                        Icon(Icons.Default.History, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ver Histórico do Jogador", color = Color.White)
+                    }
+                    
+                    Button(
+                        onClick = {
+                            onNavigateToHistory(selectedUser!!.username, "versus")
+                            selectedUser = null
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(containerColor = p1Blue)
+                    ) {
+                        Icon(Icons.Default.SwapHoriz, contentDescription = null, tint = Color.White)
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Ver Retrospecto (Versus)", color = Color.White)
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { selectedUser = null }) {
+                    Text("FECHAR", color = Color.White.copy(alpha = 0.6f))
+                }
+            }
+        )
     }
 }
 
 @Composable
-fun RankingList(usuarios: List<Usuario>) {
+fun RankingList(usuarios: List<Usuario>, onUserClick: (Usuario) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         itemsIndexed(usuarios) { index, usuario ->
-            RankingItem(rank = index + 1, usuario = usuario)
+            RankingItem(rank = index + 1, usuario = usuario, onClick = { onUserClick(usuario) })
         }
     }
 }
 
 @Composable
-fun RankingItem(rank: Int, usuario: Usuario) {
+fun RankingItem(rank: Int, usuario: Usuario, onClick: () -> Unit) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+        modifier = Modifier.fillMaxWidth().clickable { onClick() },
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.1f))
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -154,35 +175,21 @@ fun RankingItem(rank: Int, usuario: Usuario) {
                         1 -> Color(0xFFFFD700)
                         2 -> Color(0xFFC0C0C0)
                         3 -> Color(0xFFCD7F32)
-                        else -> MaterialTheme.colorScheme.primary
+                        else -> Color.White
                     },
                     modifier = Modifier.width(45.dp)
                 )
                 Column {
-                    Text(
-                        text = usuario.username,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
-                    )
-                    Text(
-                        text = "${usuario.wins} Vitórias • ${usuario.losses} Derrotas",
-                        fontSize = 12.sp,
-                        color = Color.Gray
-                    )
+                    Text(text = usuario.username, fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color.White)
+                    Text(text = "${usuario.wins} V • ${usuario.losses} D", fontSize = 12.sp, color = Color.White.copy(alpha = 0.6f))
                 }
             }
             
             Column(horizontalAlignment = Alignment.End) {
-                val totalGames = usuario.wins + usuario.losses
-                val winRate = if (totalGames > 0) (usuario.wins.toFloat() / totalGames * 100).toInt() else 0
-                
-                Text(
-                    text = "$winRate%",
-                    fontWeight = FontWeight.Black,
-                    fontSize = 18.sp,
-                    color = if (winRate >= 50) Color(0xFF2E7D32) else Color(0xFFD32F2F)
-                )
-                Text(text = "Win Rate", fontSize = 10.sp, color = Color.Gray)
+                val total = usuario.wins + usuario.losses
+                val rate = if (total > 0) (usuario.wins.toFloat() / total * 100).toInt() else 0
+                Text(text = "$rate%", fontWeight = FontWeight.Black, fontSize = 18.sp, color = if (rate >= 50) Color(0xFF4CAF50) else Color(0xFFF44336))
+                Text(text = "Win Rate", fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f))
             }
         }
     }

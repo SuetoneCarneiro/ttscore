@@ -5,12 +5,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ttscore.domain.model.Match
 import com.example.ttscore.ui.viewmodel.MatchViewModel
 import com.example.ttscore.util.Resource
 
 @Composable
 fun BotaoCriarPartida(
-    token: String,
     opponentUsername: String,
     player1Score: Int,
     player2Score: Int,
@@ -32,7 +32,7 @@ fun BotaoCriarPartida(
 
     LoadingButton(
         text = "Registrar Partida",
-        onClick = { viewModel.criarPartida(token, opponentUsername, player1Score, player2Score) },
+        onClick = { viewModel.criarPartida(opponentUsername, player1Score, player2Score) },
         isLoading = state is Resource.Loading,
         modifier = modifier,
         enabled = opponentUsername.isNotBlank()

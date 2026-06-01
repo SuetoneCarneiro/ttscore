@@ -5,27 +5,22 @@ import com.example.ttscore.data.remote.TtscoreApi
 import com.example.ttscore.data.remote.dto.*
 import com.example.ttscore.domain.model.Usuario
 import com.example.ttscore.domain.repository.UserRepository
+import kotlinx.serialization.json.Json
+import retrofit2.Response
 import java.io.IOException
 
 class UserRepositoryImpl(
     private val api: TtscoreApi
 ) : UserRepository {
 
+    private val json = Json { ignoreUnknownKeys = true }
+
     override suspend fun login(request: LoginRequest): Result<AuthResponse> {
         return try {
             val response = api.login(request)
-            if (response.isSuccessful) {
-                val authResponse = response.body()
-                if (authResponse != null) {
-                    Result.success(authResponse)
-                } else {
-                    Result.failure(Exception("Corpo da resposta vazio"))
-                }
-            } else {
-                Result.failure(Exception("Erro no login: ${response.code()}"))
-            }
+            handleAuthResponse(response)
         } catch (e: IOException) {
-            Result.failure(Exception("Falha na conexao. Verifique sua internet."))
+            Result.failure(Exception("Falha na conexão. Verifique sua internet."))
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -34,18 +29,26 @@ class UserRepositoryImpl(
     override suspend fun register(request: RegisterRequest): Result<AuthResponse> {
         return try {
             val response = api.register(request)
-            if (response.isSuccessful) {
-                val authResponse = response.body()
-                if (authResponse != null) {
-                    Result.success(authResponse)
-                } else {
-                    Result.failure(Exception("Erro ao processar cadastro"))
-                }
-            } else {
-                Result.failure(Exception("Erro no cadastro: ${response.code()}"))
-            }
+            handleAuthResponse(response)
         } catch (e: Exception) {
             Result.failure(e)
+        }
+    }
+
+    private fun handleAuthResponse(response: Response<AuthResponse>): Result<AuthResponse> {
+        return if (response.isSuccessful) {
+            val body = response.body()
+            if (body != null) Result.success(body)
+            else Result.failure(Exception("Resposta vazia do servidor"))
+        } else {
+            val errorBody = response.errorBody()?.string()
+            val message = try {
+                val errorRes = json.decodeFromString<ErrorResponse>(errorBody ?: "")
+                errorRes.message
+            } catch (e: Exception) {
+                "Erro ${response.code()}: ${response.message()}"
+            }
+            Result.failure(Exception(message))
         }
     }
 

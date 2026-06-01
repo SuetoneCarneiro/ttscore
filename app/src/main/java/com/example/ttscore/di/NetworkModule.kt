@@ -1,6 +1,7 @@
 package com.example.ttscore.di
 
 import com.example.ttscore.BuildConfig
+import com.example.ttscore.data.remote.AuthInterceptor
 import com.example.ttscore.data.remote.TtscoreApi
 import dagger.Module
 import dagger.Provides
@@ -28,12 +29,13 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(authInterceptor: AuthInterceptor): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
         return OkHttpClient.Builder()
             .addInterceptor(logging)
+            .addInterceptor(authInterceptor)
             .connectTimeout(60, TimeUnit.SECONDS)
             .readTimeout(60, TimeUnit.SECONDS)
             .writeTimeout(60, TimeUnit.SECONDS)

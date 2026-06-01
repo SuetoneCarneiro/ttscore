@@ -2,6 +2,7 @@ package com.example.ttscore.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ttscore.data.local.SessionManager
 import com.example.ttscore.data.remote.dto.AuthResponse
 import com.example.ttscore.data.remote.dto.LoginRequest
 import com.example.ttscore.domain.repository.UserRepository
@@ -14,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
-    private val repository: UserRepository
+    private val repository: UserRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _loginState = MutableStateFlow<Resource<AuthResponse>?>(null)
@@ -25,8 +27,9 @@ class LoginViewModel @Inject constructor(
             _loginState.value = Resource.Loading()
             val result = repository.login(LoginRequest(username, pass))
             
-            result.onSuccess { 
-                _loginState.value = Resource.Success(it) 
+            result.onSuccess { auth ->
+                sessionManager.saveSession(auth.token, auth.user.id)
+                _loginState.value = Resource.Success(auth)
             }
             result.onFailure { 
                 _loginState.value = Resource.Error(it.message ?: "Falha no login") 

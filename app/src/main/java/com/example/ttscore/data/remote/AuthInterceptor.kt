@@ -11,13 +11,20 @@ class AuthInterceptor @Inject constructor(
     private val sessionManager: SessionManager
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
+        val request = chain.request()
+        val path = request.url.encodedPath
+
+        if (path.contains("/api/auth/")) {
+            return chain.proceed(request)
+        }
+
         val token = runBlocking { sessionManager.token.first() }
-        val request = chain.request().newBuilder()
+        val newRequest = request.newBuilder()
         
         token?.let {
-            request.addHeader("Authorization", "Bearer $it")
+            newRequest.addHeader("Authorization", "Bearer $it")
         }
         
-        return chain.proceed(request.build())
+        return chain.proceed(newRequest.build())
     }
 }

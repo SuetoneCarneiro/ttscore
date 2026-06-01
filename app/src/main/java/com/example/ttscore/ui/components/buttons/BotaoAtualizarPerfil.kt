@@ -10,7 +10,6 @@ import com.example.ttscore.util.Resource
 
 @Composable
 fun BotaoAtualizarPerfil(
-    token: String,
     username: String?,
     avatarUrl: String?,
     modifier: Modifier = Modifier,
@@ -28,7 +27,7 @@ fun BotaoAtualizarPerfil(
 
     LoadingButton(
         text = "Salvar Alterações",
-        onClick = { viewModel.atualizarPerfil(token, username, avatarUrl) },
+        onClick = { viewModel.atualizarPerfil(username, avatarUrl) },
         isLoading = state is Resource.Loading,
         modifier = modifier
     )
