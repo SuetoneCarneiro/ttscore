@@ -15,17 +15,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.domain.model.Usuario
 import com.example.ttscore.ui.viewmodel.UserViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NovaPartidaScreen(
     onBack: () -> Unit,
     onStartMatch: (String, String, Boolean) -> Unit,
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = koinViewModel()
 ) {
     var showFriendSearch by remember { mutableStateOf(false) }
     var searchQuery by remember { mutableStateOf("") }

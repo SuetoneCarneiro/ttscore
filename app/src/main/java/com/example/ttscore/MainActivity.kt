@@ -8,9 +8,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.ttscore.ui.AppNavigation
-import dagger.hilt.android.AndroidEntryPoint
+import com.example.ttscore.ui.PartidaScreen
+import com.example.ttscore.ui.Screen
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.domain.model.Friendship
 import com.example.ttscore.ui.viewmodel.FriendshipViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun BotaoEnviarPedidoAmizade(
@@ -18,7 +18,7 @@ fun BotaoEnviarPedidoAmizade(
     modifier: Modifier = Modifier,
     onSuccess: (Friendship) -> Unit = {},
     onError: (String) -> Unit = {},
-    viewModel: FriendshipViewModel = hiltViewModel()
+    viewModel: FriendshipViewModel = koinViewModel()
 ) {
     val state by viewModel.friendshipState.collectAsState()
 

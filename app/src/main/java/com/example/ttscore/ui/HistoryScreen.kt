@@ -14,10 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.domain.model.Match
 import com.example.ttscore.ui.viewmodel.MatchViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,7 +25,7 @@ fun HistoryScreen(
     username: String,
     mode: String,
     onBack: () -> Unit,
-    viewModel: MatchViewModel = hiltViewModel()
+    viewModel: MatchViewModel = koinViewModel()
 ) {
     val matchListState by viewModel.matchListState.collectAsState()
     

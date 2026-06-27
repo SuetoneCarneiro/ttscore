@@ -6,10 +6,8 @@ import com.example.ttscore.data.local.SessionManager
 import com.example.ttscore.data.remote.dto.MatchRequest
 import com.example.ttscore.domain.repository.MatchRepository
 import com.example.ttscore.util.Resource
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 data class MatchInProgressState(
     val player1Name: String = "Jogador 1",
@@ -24,8 +22,7 @@ data class MatchInProgressState(
     val saveResultStatus: Resource<Unit>? = null
 )
 
-@HiltViewModel
-class MatchInProgressViewModel @Inject constructor(
+class MatchInProgressViewModel(
     private val matchRepository: MatchRepository,
     private val sessionManager: SessionManager
 ) : ViewModel() {
@@ -106,32 +103,28 @@ class MatchInProgressViewModel @Inject constructor(
     private fun handleMatchEnd() {
         val state = _uiState.value
         if (!state.isCasual) {
-            saveToApi(state)
+            saveToLocal(state)
         }
     }
 
-    private fun saveToApi(state: MatchInProgressState) {
+    private fun saveToLocal(state: MatchInProgressState) {
         viewModelScope.launch {
             _uiState.update { it.copy(saveResultStatus = Resource.Loading()) }
             val token = sessionManager.token.first()
-            if (token != null) {
-                val result = matchRepository.createMatch(
-                    token = token,
-                    request = MatchRequest(
-                        opponentUsername = state.player2Name,
-                        player1Score = state.player1Sets,
-                        player2Score = state.player2Sets
-                    )
+            val result = matchRepository.createMatch(
+                token = token ?: "",
+                request = MatchRequest(
+                    opponentUsername = state.player2Name,
+                    player1Score = state.player1Sets,
+                    player2Score = state.player2Sets
                 )
-                
-                result.onSuccess {
-                    _uiState.update { it.copy(saveResultStatus = Resource.Success(Unit)) }
-                }
-                result.onFailure { throwable ->
-                    _uiState.update { it.copy(saveResultStatus = Resource.Error(throwable.message ?: "Erro ao salvar resultado")) }
-                }
-            } else {
-                _uiState.update { it.copy(saveResultStatus = Resource.Error("Token não encontrado")) }
+            )
+            
+            result.onSuccess {
+                _uiState.update { it.copy(saveResultStatus = Resource.Success(Unit)) }
+            }
+            result.onFailure { throwable ->
+                _uiState.update { it.copy(saveResultStatus = Resource.Error(throwable.message ?: "Erro ao salvar resultado")) }
             }
         }
     }

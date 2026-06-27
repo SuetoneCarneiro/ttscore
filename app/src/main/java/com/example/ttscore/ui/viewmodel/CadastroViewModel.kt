@@ -2,19 +2,18 @@ package com.example.ttscore.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.ttscore.data.local.SessionManager
 import com.example.ttscore.data.remote.dto.AuthResponse
 import com.example.ttscore.data.remote.dto.RegisterRequest
 import com.example.ttscore.domain.repository.UserRepository
 import com.example.ttscore.util.Resource
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-@HiltViewModel
-class CadastroViewModel @Inject constructor(
-    private val repository: UserRepository
+class CadastroViewModel(
+    private val repository: UserRepository,
+    private val sessionManager: SessionManager
 ) : ViewModel() {
 
     private val _cadastroState = MutableStateFlow<Resource<AuthResponse>?>(null)
@@ -27,6 +26,9 @@ class CadastroViewModel @Inject constructor(
             val result = repository.register(request)
             
             result.onSuccess { 
+                viewModelScope.launch {
+                    sessionManager.saveSession(it.token, it.user.id)
+                }
                 _cadastroState.value = Resource.Success(it)
             }
             result.onFailure { exception ->

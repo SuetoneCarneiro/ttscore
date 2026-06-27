@@ -16,17 +16,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.domain.model.Usuario
 import com.example.ttscore.ui.viewmodel.UserViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RankingScreen(
     onBack: () -> Unit,
     onNavigateToHistory: (String, String) -> Unit,
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = koinViewModel()
 ) {
     val rankingState by viewModel.rankingState.collectAsState()
     var selectedUser by remember { mutableStateOf<Usuario?>(null) }
@@ -35,7 +35,7 @@ fun RankingScreen(
     val p1Blue = Color(0xFF0D47A1)
 
     LaunchedEffect(Unit) {
-        viewModel.buscarRanking()
+        viewModel.carregarRanking()
     }
 
     Scaffold(
