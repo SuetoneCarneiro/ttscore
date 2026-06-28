@@ -9,7 +9,14 @@ import com.example.ttscore.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+data class RankingUiState(
+    val isLoading: Boolean = false,
+    val ranking: List<Usuario> = emptyList(),
+    val errorMessage: String? = null
+)
 
 class UserViewModel(
     private val repository: UserRepository,
@@ -21,6 +28,9 @@ class UserViewModel(
 
     private val _rankingState = MutableStateFlow<Resource<List<Usuario>>?>(null)
     val rankingState = _rankingState.asStateFlow()
+
+    private val _rankingUiState = MutableStateFlow(RankingUiState())
+    val rankingUiState = _rankingUiState.asStateFlow()
 
     private val _searchState = MutableStateFlow<Resource<List<Usuario>>?>(null)
     val searchState = _searchState.asStateFlow()
