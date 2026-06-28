@@ -28,7 +28,7 @@ fun RankingScreen(
     onNavigateToHistory: (String, String) -> Unit,
     viewModel: UserViewModel = koinViewModel()
 ) {
-    val rankingState by viewModel.rankingState.collectAsState()
+    val uiState by viewModel.rankingUiState.collectAsState()
     var selectedUser by remember { mutableStateOf<Usuario?>(null) }
 
     val darkNavy = Color(0xFF001F3F)
@@ -64,36 +64,30 @@ fun RankingScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (val state = rankingState) {
-                is Resource.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
-                }
-                is Resource.Success -> {
-                    val rankingList = state.data ?: emptyList()
-                    if (rankingList.isEmpty()) {
-                        Text(
-                            text = "Nenhum jogador encontrado",
-                            color = Color.White,
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    } else {
-                        RankingList(rankingList) { user -> selectedUser = user }
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
+            } else if (uiState.errorMessage != null) {
+                Column(
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(text = "Erro ao carregar ranking", color = Color(0xFFB71C1C), fontWeight = FontWeight.Bold)
+                    Text(text = uiState.errorMessage ?: "", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Button(onClick = onBack, colors = ButtonDefaults.buttonColors(containerColor = p1Blue)) {
+                        Text("Voltar", color = Color.White)
                     }
                 }
-                is Resource.Error -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center).padding(16.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(text = "Erro ao carregar ranking", color = Color(0xFFB71C1C), fontWeight = FontWeight.Bold)
-                        Text(text = state.message ?: "", fontSize = 12.sp, color = Color.White.copy(alpha = 0.7f))
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = onBack, colors = ButtonDefaults.buttonColors(containerColor = p1Blue)) {
-                            Text("Voltar", color = Color.White)
-                        }
-                    }
+            } else {
+                if (uiState.ranking.isEmpty()) {
+                    Text(
+                        text = "Nenhum jogador encontrado",
+                        color = Color.White,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                } else {
+                    RankingList(uiState.ranking) { user -> selectedUser = user }
                 }
-                null -> {}
             }
         }
     }
