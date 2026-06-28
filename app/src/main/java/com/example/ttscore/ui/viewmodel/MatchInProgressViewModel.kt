@@ -19,6 +19,7 @@ data class MatchInProgressState(
     val isMatchFinished: Boolean = false,
     val winnerName: String? = null,
     val isCasual: Boolean = true,
+    val isInitialized: Boolean = false,
     val saveResultStatus: Resource<Unit>? = null
 )
 
@@ -31,6 +32,8 @@ class MatchInProgressViewModel(
     val uiState: StateFlow<MatchInProgressState> = _uiState.asStateFlow()
 
     fun setupMatch(p1Name: String, p2Name: String, isCasual: Boolean) {
+        if (_uiState.value.isInitialized) return
+        
         _uiState.update { it.copy(
             player1Name = p1Name,
             player2Name = p2Name,
@@ -41,6 +44,7 @@ class MatchInProgressViewModel(
             player2Sets = 0,
             isMatchFinished = false,
             winnerName = null,
+            isInitialized = true,
             saveResultStatus = null
         ) }
     }
