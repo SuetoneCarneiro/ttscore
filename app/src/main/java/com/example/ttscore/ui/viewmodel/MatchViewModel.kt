@@ -35,31 +35,43 @@ class MatchViewModel(
 
     fun buscarMinhasPartidas() {
         viewModelScope.launch {
-            _matchListState.value = Resource.Loading()
+            _matchListUiState.update { it.copy(isLoading = true, errorMessage = null) }
             val token = sessionManager.token.first()
             val result = repository.getMyMatches(token ?: "")
-            result.onSuccess { _matchListState.value = Resource.Success(it) }
-            result.onFailure { _matchListState.value = Resource.Error(it.message ?: "Erro ao buscar partidas") }
+            result.onSuccess { list ->
+                _matchListUiState.update { it.copy(isLoading = false, matches = list) }
+            }
+            result.onFailure { error ->
+                _matchListUiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
         }
     }
 
     fun buscarPartidasPorUsername(username: String) {
         viewModelScope.launch {
-            _matchListState.value = Resource.Loading()
+            _matchListUiState.update { it.copy(isLoading = true, errorMessage = null) }
             val token = sessionManager.token.first()
             val result = repository.getMatchesByUsername(token ?: "", username)
-            result.onSuccess { _matchListState.value = Resource.Success(it) }
-            result.onFailure { _matchListState.value = Resource.Error(it.message ?: "Erro ao buscar partidas") }
+            result.onSuccess { list ->
+                _matchListUiState.update { it.copy(isLoading = false, matches = list) }
+            }
+            result.onFailure { error ->
+                _matchListUiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
         }
     }
 
     fun buscarHeadToHead(opponentUsername: String) {
         viewModelScope.launch {
-            _matchListState.value = Resource.Loading()
+            _matchListUiState.update { it.copy(isLoading = true, errorMessage = null) }
             val token = sessionManager.token.first()
             val result = repository.getHeadToHead(token ?: "", opponentUsername)
-            result.onSuccess { _matchListState.value = Resource.Success(it) }
-            result.onFailure { _matchListState.value = Resource.Error(it.message ?: "Erro ao buscar retrospecto") }
+            result.onSuccess { list ->
+                _matchListUiState.update { it.copy(isLoading = false, matches = list) }
+            }
+            result.onFailure { error ->
+                _matchListUiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
         }
     }
 
