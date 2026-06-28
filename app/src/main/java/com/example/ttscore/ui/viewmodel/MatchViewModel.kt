@@ -10,7 +10,14 @@ import com.example.ttscore.util.Resource
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+
+data class MatchListUiState(
+    val isLoading: Boolean = false,
+    val matches: List<Match> = emptyList(),
+    val errorMessage: String? = null
+)
 
 class MatchViewModel(
     private val repository: MatchRepository,
@@ -19,6 +26,9 @@ class MatchViewModel(
 
     private val _matchListState = MutableStateFlow<Resource<List<Match>>?>(null)
     val matchListState = _matchListState.asStateFlow()
+
+    private val _matchListUiState = MutableStateFlow(MatchListUiState())
+    val matchListUiState = _matchListUiState.asStateFlow()
 
     private val _matchState = MutableStateFlow<Resource<Match>?>(null)
     val matchState = _matchState.asStateFlow()
