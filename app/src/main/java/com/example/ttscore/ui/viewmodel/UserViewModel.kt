@@ -65,10 +65,19 @@ class UserViewModel(
     fun carregarRanking() {
         viewModelScope.launch {
             _rankingState.value = Resource.Loading()
+            _rankingUiState.update { it.copy(isLoading = true, errorMessage = null) }
+            
             val token = sessionManager.token.first()
             val result = repository.getRanking(token ?: "")
-            result.onSuccess { _rankingState.value = Resource.Success(it) }
-            result.onFailure { _rankingState.value = Resource.Error(it.message ?: "Erro ao carregar ranking") }
+            
+            result.onSuccess { list -> 
+                _rankingState.value = Resource.Success(list)
+                _rankingUiState.update { it.copy(isLoading = false, ranking = list) }
+            }
+            result.onFailure { error -> 
+                _rankingState.value = Resource.Error(error.message ?: "Erro ao carregar ranking")
+                _rankingUiState.update { it.copy(isLoading = false, errorMessage = error.message) }
+            }
         }
     }
 
