@@ -7,10 +7,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.data.remote.dto.AuthResponse
 import com.example.ttscore.ui.viewmodel.CadastroViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun BotaoRegistrar(
@@ -20,7 +20,7 @@ fun BotaoRegistrar(
     modifier: Modifier = Modifier,
     onSuccess: (AuthResponse) -> Unit = {},
     onError: (String) -> Unit = {},
-    viewModel: CadastroViewModel = hiltViewModel()
+    viewModel: CadastroViewModel = koinViewModel()
 ) {
     val state by viewModel.cadastroState.collectAsState()
 

@@ -16,9 +16,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.ui.viewmodel.UserViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +28,7 @@ fun DashboardScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToHistory: (String, String) -> Unit,
     onLogout: () -> Unit,
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = koinViewModel()
 ) {
     val darkNavy = Color(0xFF001F3F)
     val p1Blue = Color(0xFF0D47A1)

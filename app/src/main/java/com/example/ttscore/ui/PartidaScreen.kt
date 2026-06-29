@@ -20,11 +20,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.ttscore.ui.theme.TtscoreTheme
 import com.example.ttscore.ui.viewmodel.MatchInProgressViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,7 +35,7 @@ fun PartidaScreen(
     player2Name: String,
     isCasual: Boolean,
     onFinish: () -> Unit,
-    viewModel: MatchInProgressViewModel = hiltViewModel()
+    viewModel: MatchInProgressViewModel = koinViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val context = LocalContext.current
@@ -239,5 +241,18 @@ fun ScoreButton(
                 modifier = Modifier.size(32.dp)
             )
         }
+    }
+}
+
+@Preview(showBackground = true, widthDp = 800, heightDp = 400)
+@Composable
+fun PartidaScreenPreview() {
+    TtscoreTheme {
+        PartidaScreen(
+            player1Name = "Pedro Lucas",
+            player2Name = "Jonas Sarmento",
+            isCasual = true,
+            onFinish = {}
+        )
     }
 }

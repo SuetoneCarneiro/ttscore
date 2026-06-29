@@ -9,9 +9,9 @@
               <option name="connection">
                 <ConnectionSetting>
                   <option name="appId" value="com.example.ttscore" />
-                  <option name="mobileSdkAppId" value="1:408134807144:android:7603c71d2f0ff537c055dd" />
-                  <option name="projectId" value="ttscore-76d38" />
-                  <option name="projectNumber" value="408134807144" />
+                  <option name="mobileSdkAppId" value="1:459105648750:android:223d04337dd3506d15e67f" />
+                  <option name="projectId" value="ttscore-1cb8d" />
+                  <option name="projectNumber" value="459105648750" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

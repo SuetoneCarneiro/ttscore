@@ -7,10 +7,10 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.data.remote.dto.AuthResponse
 import com.example.ttscore.ui.viewmodel.LoginViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun BotaoLogin(
@@ -19,7 +19,7 @@ fun BotaoLogin(
     modifier: Modifier = Modifier,
     onSuccess: (AuthResponse) -> Unit = {},
     onError: (String) -> Unit = {},
-    viewModel: LoginViewModel = hiltViewModel()
+    viewModel: LoginViewModel = koinViewModel()
 ) {
     val state by viewModel.loginState.collectAsState()
 

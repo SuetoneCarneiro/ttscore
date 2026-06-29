@@ -13,15 +13,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.ui.viewmodel.UserViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
     onBack: () -> Unit,
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val userState by viewModel.userState.collectAsState()

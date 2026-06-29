@@ -14,10 +14,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.domain.model.Match
 import com.example.ttscore.ui.viewmodel.MatchViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -25,9 +25,9 @@ fun HistoryScreen(
     username: String,
     mode: String,
     onBack: () -> Unit,
-    viewModel: MatchViewModel = hiltViewModel()
+    viewModel: MatchViewModel = koinViewModel()
 ) {
-    val matchListState by viewModel.matchListState.collectAsState()
+    val uiState by viewModel.matchListUiState.collectAsState()
     
     val darkNavy = Color(0xFF001F3F)
     val p2Red = Color(0xFFB71C1C)
@@ -71,41 +71,35 @@ fun HistoryScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            when (val state = matchListState) {
-                is Resource.Loading -> {
-                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
-                }
-                is Resource.Success -> {
-                    val matches = state.data ?: emptyList()
-                    if (matches.isEmpty()) {
-                        Column(
-                            modifier = Modifier.align(Alignment.Center),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Icon(Icons.Default.History, contentDescription = null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(64.dp))
-                            Text("Nenhuma partida encontrada", color = Color.White.copy(alpha = 0.5f))
-                        }
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(matches) { match ->
-                                MatchItem(match)
-                            }
+            if (uiState.isLoading) {
+                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center), color = Color.White)
+            } else if (uiState.errorMessage != null) {
+                Text(
+                    text = uiState.errorMessage ?: "Erro ao carregar histórico",
+                    color = p2Red,
+                    modifier = Modifier.align(Alignment.Center).padding(16.dp),
+                    fontWeight = FontWeight.Bold
+                )
+            } else {
+                if (uiState.matches.isEmpty()) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(Icons.Default.History, contentDescription = null, tint = Color.White.copy(alpha = 0.3f), modifier = Modifier.size(64.dp))
+                        Text("Nenhuma partida encontrada", color = Color.White.copy(alpha = 0.5f))
+                    }
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(uiState.matches) { match ->
+                            MatchItem(match)
                         }
                     }
                 }
-                is Resource.Error -> {
-                    Text(
-                        text = state.message ?: "Erro ao carregar histórico",
-                        color = p2Red,
-                        modifier = Modifier.align(Alignment.Center).padding(16.dp),
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                null -> {}
             }
         }
     }

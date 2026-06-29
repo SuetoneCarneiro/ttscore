@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
+import org.koin.androidx.compose.koinViewModel
 import com.example.ttscore.ui.viewmodel.UserViewModel
 import com.example.ttscore.util.Resource
 
@@ -15,7 +15,7 @@ fun BotaoAtualizarPerfil(
     modifier: Modifier = Modifier,
     onSuccess: () -> Unit = {},
     onError: (String) -> Unit = {},
-    viewModel: UserViewModel = hiltViewModel()
+    viewModel: UserViewModel = koinViewModel()
 ) {
     val state by viewModel.userState.collectAsState()
 

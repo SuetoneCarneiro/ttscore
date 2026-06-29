@@ -4,10 +4,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.ttscore.domain.model.Match
 import com.example.ttscore.ui.viewmodel.MatchViewModel
 import com.example.ttscore.util.Resource
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun BotaoCriarPartida(
@@ -17,7 +17,7 @@ fun BotaoCriarPartida(
     modifier: Modifier = Modifier,
     onSuccess: () -> Unit = {},
     onError: (String) -> Unit = {},
-    viewModel: MatchViewModel = hiltViewModel()
+    viewModel: MatchViewModel = koinViewModel()
 ) {
     val state by viewModel.matchState.collectAsState()
 
