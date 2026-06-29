@@ -33,8 +33,10 @@ val appModule = module {
 
     single { SessionManager(androidContext()) }
 
-    single<UserRepository> { UserRepositoryImpl(get()) }
-    single<MatchRepository> { MatchRepositoryImpl(get(), get(), get()) }
+    single { com.example.ttscore.data.remote.RetrofitClient.api }
+
+    single<UserRepository> { UserRepositoryImpl(get(), get()) }
+    single<MatchRepository> { MatchRepositoryImpl(get()) }
     single<FriendshipRepository> { FriendshipRepositoryImpl() }
 
     viewModel { CadastroViewModel(get(), get()) }

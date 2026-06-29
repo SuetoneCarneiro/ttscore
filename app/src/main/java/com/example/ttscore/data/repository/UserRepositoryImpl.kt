@@ -2,27 +2,27 @@ package com.example.ttscore.data.repository
 
 import com.example.ttscore.data.local.dao.UserDao
 import com.example.ttscore.data.local.entity.UserEntity
+import com.example.ttscore.data.mapper.toDomain
+import com.example.ttscore.data.remote.TtscoreApi
 import com.example.ttscore.data.remote.dto.*
 import com.example.ttscore.domain.model.Usuario
 import com.example.ttscore.domain.repository.UserRepository
 import java.util.UUID
 
 class UserRepositoryImpl(
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val api: TtscoreApi
 ) : UserRepository {
 
     override suspend fun login(request: LoginRequest): Result<AuthResponse> {
         return try {
-            val userEntity = userDao.getUserByUsername(request.username)
-            if (userEntity != null) {
-                Result.success(
-                    AuthResponse(
-                        token = "local-token",
-                        user = userEntity.toUserResponse()
-                    )
-                )
+            val response = api.login(request)
+            if (response.isSuccessful && response.body() != null) {
+                val auth = response.body()!!
+                userDao.insertUser(auth.user.toEntity())
+                Result.success(auth)
             } else {
-                Result.failure(Exception("Usuário não encontrado"))
+                Result.failure(Exception("Falha no login: ${response.code()}"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -31,46 +31,53 @@ class UserRepositoryImpl(
 
     override suspend fun register(request: RegisterRequest): Result<AuthResponse> {
         return try {
-            val existing = userDao.getUserByUsername(request.username)
-            if (existing != null) {
-                return Result.failure(Exception("Usuário já existe"))
+            val response = api.register(request)
+            if (response.isSuccessful && response.body() != null) {
+                val auth = response.body()!!
+                userDao.insertUser(auth.user.toEntity())
+                Result.success(auth)
+            } else {
+                Result.failure(Exception("Falha no cadastro: ${response.code()}"))
             }
-
-            val newUser = UserEntity(
-                id = UUID.randomUUID().toString(),
-                username = request.username,
-                email = request.email,
-                avatarUrl = null,
-                createdAt = System.currentTimeMillis().toString(),
-                wins = 0,
-                losses = 0
-            )
-            userDao.insertUser(newUser)
-
-            Result.success(
-                AuthResponse(
-                    token = "local-token",
-                    user = newUser.toUserResponse()
-                )
-            )
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
     override suspend fun getMyProfile(token: String): Result<Usuario> {
-        return Result.failure(Exception("Perfil local não implementado (sem sessão)"))
+        return try {
+            val response = api.getMyProfile("Bearer $token")
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!.toDomain())
+            } else {
+                Result.failure(Exception("Erro ao carregar perfil: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun updateProfile(token: String, request: UpdateProfileRequest): Result<Usuario> {
-        return Result.failure(Exception("Update profile não implementado"))
+        return try {
+            val response = api.updateProfile("Bearer $token", request)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!.toDomain())
+            } else {
+                Result.failure(Exception("Erro ao atualizar perfil: ${response.code()}"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun getUserById(token: String, id: String): Result<Usuario> {
         return try {
-            val user = userDao.getUserById(id)
-            if (user != null) Result.success(user.toDomain())
-            else Result.failure(Exception("Usuário não encontrado"))
+            val response = api.getUserById("Bearer $token", id)
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!.toDomain())
+            } else {
+                Result.failure(Exception("Usuário não encontrado: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -78,8 +85,14 @@ class UserRepositoryImpl(
 
     override suspend fun searchUsers(token: String, query: String): Result<List<Usuario>> {
         return try {
-            val users = userDao.searchUsers(query)
-            Result.success(users.map { it.toDomain() })
+            val response = api.searchUsers("Bearer $token", query)
+            if (response.isSuccessful && response.body() != null) {
+                val users = response.body()!!
+                userDao.insertUsers(users.map { it.toEntity() })
+                Result.success(users.map { it.toDomain() })
+            } else {
+                Result.failure(Exception("Erro na busca: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -87,12 +100,26 @@ class UserRepositoryImpl(
 
     override suspend fun getRanking(token: String): Result<List<Usuario>> {
         return try {
-            val users = userDao.getRanking()
-            Result.success(users.map { it.toDomain() })
+            val response = api.getRanking("Bearer $token")
+            if (response.isSuccessful && response.body() != null) {
+                Result.success(response.body()!!.map { it.toDomain() })
+            } else {
+                Result.failure(Exception("Erro ao carregar ranking: ${response.code()}"))
+            }
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
+
+    private fun UserResponse.toEntity() = UserEntity(
+        id = id,
+        username = username,
+        email = email,
+        avatarUrl = avatarUrl,
+        createdAt = createdAt,
+        wins = wins,
+        losses = losses
+    )
 
     private fun UserEntity.toUserResponse() = UserResponse(
         id = id,

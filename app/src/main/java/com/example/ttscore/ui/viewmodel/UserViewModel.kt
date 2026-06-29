@@ -88,6 +88,20 @@ class UserViewModel(
     }
 
     fun atualizarPerfil(username: String?, avatarUrl: String?) {
-        // Local update logic can be added here if needed
+        viewModelScope.launch {
+            _userState.value = Resource.Loading()
+            val token = sessionManager.token.first()
+            val result = repository.updateProfile(
+                token ?: "",
+                com.example.ttscore.data.remote.dto.UpdateProfileRequest(username, avatarUrl)
+            )
+            result.onSuccess { 
+                _userState.value = Resource.Success(it)
+                _myProfileState.value = Resource.Success(it) // Atualiza o perfil localmente
+            }
+            result.onFailure { 
+                _userState.value = Resource.Error(it.message ?: "Erro ao atualizar perfil")
+            }
+        }
     }
 }
